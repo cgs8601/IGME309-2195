@@ -5,15 +5,7 @@ Date: 2017/05
 #ifndef __MYMESH_H_
 #define __MYMESH_H_
 
-#include "Simplex\Simplex.h"
-using namespace Simplex;
-
-#include "SFML\Window.hpp"
-#include "SFML\Graphics.hpp"
-#include "SFML\OpenGL.hpp"
-
-#include "ControllerConfiguration.h"
-#include "imgui\ImGuiObject.h"
+#include "Definitions.h"
 
 class MyMesh
 {
@@ -137,15 +129,6 @@ public:
 	OUTPUT: ---
 	*/
 	void AddQuad(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTopLeft, vector3 a_vTopRight);
-	/*
-	USAGE: Adds a circle to the list points in the buffer to be compiled
-	ARGUMENTS:
-	-   vector3 the center vertex of the circle
-	-	float a_fRadius the radius of the circle
-	-	a_nSubdivisions how many subdivisions the circle should be composed of.
-	OUTPUT: ---
-	*/
-	void AddCircle( vector3 centerVertex, float a_fRadius, float a_nSubdivisions );
 #pragma region 3D Primitives
 	/*
 	USAGE: Generates a cube
@@ -194,8 +177,6 @@ public:
 	OUTPUT: ---
 	*/
 	void GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color = C_WHITE);
-	float CalculateTorusX( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle );
-	float CalculateTorusY( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle );
 	/*
 	USAGE: Generates a torus mesh
 	ARGUMENTS:

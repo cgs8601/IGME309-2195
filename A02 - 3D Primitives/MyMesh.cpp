@@ -1,396 +1,563 @@
 #include "MyMesh.h"
-void MyMesh::Init(void)
-{
-	m_bBinded = false;
-	m_uVertexCount = 0;
+void MyMesh::Init( void ) {
+    m_bBinded = false;
+    m_uVertexCount = 0;
 
-	m_VAO = 0;
-	m_VBO = 0;
+    m_VAO = 0;
+    m_VBO = 0;
 
-	m_pShaderMngr = ShaderManager::GetInstance();
+    m_pShaderMngr = ShaderManager::GetInstance();
 }
-void MyMesh::Release(void)
-{
-	m_pShaderMngr = nullptr;
+void MyMesh::Release( void ) {
+    m_pShaderMngr = nullptr;
 
-	if (m_VBO > 0)
-		glDeleteBuffers(1, &m_VBO);
+    if ( m_VBO > 0 )
+        glDeleteBuffers( 1, &m_VBO );
 
-	if (m_VAO > 0)
-		glDeleteVertexArrays(1, &m_VAO);
+    if ( m_VAO > 0 )
+        glDeleteVertexArrays( 1, &m_VAO );
 
-	m_lVertex.clear();
-	m_lVertexPos.clear();
-	m_lVertexCol.clear();
+    m_lVertex.clear();
+    m_lVertexPos.clear();
+    m_lVertexCol.clear();
 }
-MyMesh::MyMesh()
-{
-	Init();
+MyMesh::MyMesh() {
+    Init();
 }
-MyMesh::~MyMesh() { Release(); }
-MyMesh::MyMesh(MyMesh& other)
-{
-	m_bBinded = other.m_bBinded;
-
-	m_pShaderMngr = other.m_pShaderMngr;
-
-	m_uVertexCount = other.m_uVertexCount;
-
-	m_VAO = other.m_VAO;
-	m_VBO = other.m_VBO;
+MyMesh::~MyMesh() {
+    Release();
 }
-MyMesh& MyMesh::operator=(MyMesh& other)
-{
-	if (this != &other)
-	{
-		Release();
-		Init();
-		MyMesh temp(other);
-		Swap(temp);
-	}
-	return *this;
+MyMesh::MyMesh( MyMesh &other ) {
+    m_bBinded = other.m_bBinded;
+
+    m_pShaderMngr = other.m_pShaderMngr;
+
+    m_uVertexCount = other.m_uVertexCount;
+
+    m_VAO = other.m_VAO;
+    m_VBO = other.m_VBO;
 }
-void MyMesh::Swap(MyMesh& other)
-{
-	std::swap(m_bBinded, other.m_bBinded);
-	std::swap(m_uVertexCount, other.m_uVertexCount);
-
-	std::swap(m_VAO, other.m_VAO);
-	std::swap(m_VBO, other.m_VBO);
-
-	std::swap(m_lVertex, other.m_lVertex);
-	std::swap(m_lVertexPos, other.m_lVertexPos);
-	std::swap(m_lVertexCol, other.m_lVertexCol);
-
-	std::swap(m_pShaderMngr, other.m_pShaderMngr);
+MyMesh &MyMesh::operator=( MyMesh &other ) {
+    if ( this != &other ) {
+        Release();
+        Init();
+        MyMesh temp( other );
+        Swap( temp );
+    }
+    return *this;
 }
-void MyMesh::CompleteMesh(vector3 a_v3Color)
-{
-	uint uColorCount = m_lVertexCol.size();
-	for (uint i = uColorCount; i < m_uVertexCount; ++i)
-	{
-		m_lVertexCol.push_back(a_v3Color);
-	}
+void MyMesh::Swap( MyMesh &other ) {
+    std::swap( m_bBinded, other.m_bBinded );
+    std::swap( m_uVertexCount, other.m_uVertexCount );
+
+    std::swap( m_VAO, other.m_VAO );
+    std::swap( m_VBO, other.m_VBO );
+
+    std::swap( m_lVertex, other.m_lVertex );
+    std::swap( m_lVertexPos, other.m_lVertexPos );
+    std::swap( m_lVertexCol, other.m_lVertexCol );
+
+    std::swap( m_pShaderMngr, other.m_pShaderMngr );
 }
-void MyMesh::AddVertexPosition(vector3 a_v3Input)
-{
-	m_lVertexPos.push_back(a_v3Input);
-	m_uVertexCount = m_lVertexPos.size();
+void MyMesh::CompleteMesh( vector3 a_v3Color ) {
+    uint uColorCount = m_lVertexCol.size();
+    for ( uint i = uColorCount; i < m_uVertexCount; ++i ) {
+        m_lVertexCol.push_back( a_v3Color );
+    }
 }
-void MyMesh::AddVertexColor(vector3 a_v3Input)
-{
-	m_lVertexCol.push_back(a_v3Input);
+void MyMesh::AddVertexPosition( vector3 a_v3Input ) {
+    m_lVertexPos.push_back( a_v3Input );
+    m_uVertexCount = m_lVertexPos.size();
 }
-void MyMesh::CompileOpenGL3X(void)
-{
-	if (m_bBinded)
-		return;
-
-	if (m_uVertexCount == 0)
-		return;
-
-	CompleteMesh();
-
-	for (uint i = 0; i < m_uVertexCount; i++)
-	{
-		//Position
-		m_lVertex.push_back(m_lVertexPos[i]);
-		//Color
-		m_lVertex.push_back(m_lVertexCol[i]);
-	}
-	glGenVertexArrays(1, &m_VAO);//Generate vertex array object
-	glGenBuffers(1, &m_VBO);//Generate Vertex Buffered Object
-
-	glBindVertexArray(m_VAO);//Bind the VAO
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);//Bind the VBO
-	glBufferData(GL_ARRAY_BUFFER, m_uVertexCount * 2 * sizeof(vector3), &m_lVertex[0], GL_STATIC_DRAW);//Generate space for the VBO
-
-	// Position attribute
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(vector3), (GLvoid*)0);
-
-	// Color attribute
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(vector3), (GLvoid*)(1 * sizeof(vector3)));
-
-	m_bBinded = true;
-
-	glBindVertexArray(0); // Unbind VAO
+void MyMesh::AddVertexColor( vector3 a_v3Input ) {
+    m_lVertexCol.push_back( a_v3Input );
 }
-void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
-{
-	// Use the buffer and shader
-	GLuint nShader = m_pShaderMngr->GetShaderID("Basic");
-	glUseProgram(nShader); 
+void MyMesh::CompileOpenGL3X( void ) {
+    if ( m_bBinded )
+        return;
 
-	//Bind the VAO of this object
-	glBindVertexArray(m_VAO);
+    if ( m_uVertexCount == 0 )
+        return;
 
-	// Get the GPU variables by their name and hook them to CPU variables
-	GLuint MVP = glGetUniformLocation(nShader, "MVP");
-	GLuint wire = glGetUniformLocation(nShader, "wire");
+    CompleteMesh();
 
-	//Final Projection of the Camera
-	matrix4 m4MVP = a_mProjection * a_mView * a_mModel;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(m4MVP));
-	
-	//Solid
-	glUniform3f(wire, -1.0f, -1.0f, -1.0f);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);  
+    for ( uint i = 0; i < m_uVertexCount; i++ ) {
+        //Position
+        m_lVertex.push_back( m_lVertexPos[i] );
+        //Color
+        m_lVertex.push_back( m_lVertexCol[i] );
+    }
+    glGenVertexArrays( 1, &m_VAO );//Generate vertex array object
+    glGenBuffers( 1, &m_VBO );//Generate Vertex Buffered Object
 
-	//Wire
-	glUniform3f(wire, 1.0f, 0.0f, 1.0f);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glEnable(GL_POLYGON_OFFSET_LINE);
-	glPolygonOffset(-1.f, -1.f);
-	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);
-	glDisable(GL_POLYGON_OFFSET_LINE);
+    glBindVertexArray( m_VAO );//Bind the VAO
+    glBindBuffer( GL_ARRAY_BUFFER, m_VBO );//Bind the VBO
+    glBufferData( GL_ARRAY_BUFFER, m_uVertexCount * 2 * sizeof( vector3 ), &m_lVertex[0], GL_STATIC_DRAW );//Generate space for the VBO
 
-	glBindVertexArray(0);// Unbind VAO so it does not get in the way of other objects
+    // Position attribute
+    glEnableVertexAttribArray( 0 );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof( vector3 ), (GLvoid *) 0 );
+
+    // Color attribute
+    glEnableVertexAttribArray( 1 );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof( vector3 ), (GLvoid *) ( 1 * sizeof( vector3 ) ) );
+
+    m_bBinded = true;
+
+    glBindVertexArray( 0 ); // Unbind VAO
 }
-void MyMesh::AddTri(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTopLeft)
-{
-	//C
-	//| \
+void MyMesh::Render( matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel ) {
+    // Use the buffer and shader
+    GLuint nShader = m_pShaderMngr->GetShaderID( "Basic" );
+    glUseProgram( nShader );
+
+    //Bind the VAO of this object
+    glBindVertexArray( m_VAO );
+
+    // Get the GPU variables by their name and hook them to CPU variables
+    GLuint MVP = glGetUniformLocation( nShader, "MVP" );
+    GLuint wire = glGetUniformLocation( nShader, "wire" );
+
+    //Final Projection of the Camera
+    matrix4 m4MVP = a_mProjection * a_mView * a_mModel;
+    glUniformMatrix4fv( MVP, 1, GL_FALSE, glm::value_ptr( m4MVP ) );
+
+    //Solid
+    glUniform3f( wire, -1.0f, -1.0f, -1.0f );
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glDrawArrays( GL_TRIANGLES, 0, m_uVertexCount );
+
+    //Wire
+    glUniform3f( wire, 1.0f, 0.0f, 1.0f );
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glEnable( GL_POLYGON_OFFSET_LINE );
+    glPolygonOffset( -1.f, -1.f );
+    glDrawArrays( GL_TRIANGLES, 0, m_uVertexCount );
+    glDisable( GL_POLYGON_OFFSET_LINE );
+
+    glBindVertexArray( 0 );// Unbind VAO so it does not get in the way of other objects
+}
+void MyMesh::AddTri( vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTopLeft ) {
+    //C
+    //| \
 	//A--B
-	//This will make the triangle A->B->C 
-	AddVertexPosition(a_vBottomLeft);
-	AddVertexPosition(a_vBottomRight);
-	AddVertexPosition(a_vTopLeft);
+    //This will make the triangle A->B->C 
+    AddVertexPosition( a_vBottomLeft );
+    AddVertexPosition( a_vBottomRight );
+    AddVertexPosition( a_vTopLeft );
 }
-void MyMesh::AddQuad(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTopLeft, vector3 a_vTopRight)
-{
-	//C--D
-	//|  |
-	//A--B
-	//This will make the triangle A->B->C and then the triangle C->B->D
-	AddVertexPosition(a_vBottomLeft);
-	AddVertexPosition(a_vBottomRight);
-	AddVertexPosition(a_vTopLeft);
+void MyMesh::AddQuad( vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTopLeft, vector3 a_vTopRight ) {
+    //C--D
+    //|  |
+    //A--B
+    //This will make the triangle A->B->C and then the triangle C->B->D
+    AddVertexPosition( a_vBottomLeft );
+    AddVertexPosition( a_vBottomRight );
+    AddVertexPosition( a_vTopLeft );
 
-	AddVertexPosition(a_vTopLeft);
-	AddVertexPosition(a_vBottomRight);
-	AddVertexPosition(a_vTopRight);
+    AddVertexPosition( a_vTopLeft );
+    AddVertexPosition( a_vBottomRight );
+    AddVertexPosition( a_vTopRight );
 }
-void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
-{
-	if (a_fSize < 0.01f)
-		a_fSize = 0.01f;
+void MyMesh::AddCircle( vector3 centerVertex, float a_fRadius, float a_nSubdivisions ) {
+    for ( int i = 0; i < a_nSubdivisions; i++ ) {
+        float currentAngle = 2 * PI / a_nSubdivisions * i;
+        float nextAngle = 2 * PI / a_nSubdivisions * ( i + 1 );
 
-	Release();
-	Init();
+        vector3 firstVertex = vector3( a_fRadius * cosf( currentAngle ), a_fRadius * sinf( currentAngle ), 0.0f );
+        vector3 secondVertex = vector3( a_fRadius * cosf( nextAngle ), a_fRadius * sinf( nextAngle ), 0.0f );
 
-	float fValue = a_fSize * 0.5f;
-	//3--2
-	//|  |
-	//0--1
-
-	vector3 point0(-fValue,-fValue, fValue); //0
-	vector3 point1( fValue,-fValue, fValue); //1
-	vector3 point2( fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
-
-	vector3 point4(-fValue,-fValue,-fValue); //4
-	vector3 point5( fValue,-fValue,-fValue); //5
-	vector3 point6( fValue, fValue,-fValue); //6
-	vector3 point7(-fValue, fValue,-fValue); //7
-
-	//F
-	AddQuad(point0, point1, point3, point2);
-
-	//B
-	AddQuad(point5, point4, point6, point7);
-
-	//L
-	AddQuad(point4, point0, point7, point3);
-
-	//R
-	AddQuad(point1, point5, point2, point6);
-
-	//U
-	AddQuad(point3, point2, point7, point6);
-
-	//D
-	AddQuad(point4, point5, point0, point1);
-
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+        AddTri( firstVertex, secondVertex, centerVertex );
+    }
 }
-void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
-{
-	Release();
-	Init();
+void MyMesh::GenerateCube( float a_fSize, vector3 a_v3Color ) {
+    if ( a_fSize < 0.01f )
+        a_fSize = 0.01f;
 
-	vector3 v3Value = a_v3Dimensions * 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-v3Value.x, -v3Value.y, v3Value.z); //0
-	vector3 point1(v3Value.x, -v3Value.y, v3Value.z); //1
-	vector3 point2(v3Value.x, v3Value.y, v3Value.z); //2
-	vector3 point3(-v3Value.x, v3Value.y, v3Value.z); //3
+    Release();
+    Init();
 
-	vector3 point4(-v3Value.x, -v3Value.y, -v3Value.z); //4
-	vector3 point5(v3Value.x, -v3Value.y, -v3Value.z); //5
-	vector3 point6(v3Value.x, v3Value.y, -v3Value.z); //6
-	vector3 point7(-v3Value.x, v3Value.y, -v3Value.z); //7
+    float fValue = a_fSize * 0.5f;
+    //3--2
+    //|  |
+    //0--1
 
-	//F
-	AddQuad(point0, point1, point3, point2);
+    vector3 point0( -fValue, -fValue, fValue ); //0
+    vector3 point1( fValue, -fValue, fValue ); //1
+    vector3 point2( fValue, fValue, fValue ); //2
+    vector3 point3( -fValue, fValue, fValue ); //3
 
-	//B
-	AddQuad(point5, point4, point6, point7);
+    vector3 point4( -fValue, -fValue, -fValue ); //4
+    vector3 point5( fValue, -fValue, -fValue ); //5
+    vector3 point6( fValue, fValue, -fValue ); //6
+    vector3 point7( -fValue, fValue, -fValue ); //7
 
-	//L
-	AddQuad(point4, point0, point7, point3);
+    //F
+    AddQuad( point0, point1, point3, point2 );
 
-	//R
-	AddQuad(point1, point5, point2, point6);
+    //B
+    AddQuad( point5, point4, point6, point7 );
 
-	//U
-	AddQuad(point3, point2, point7, point6);
+    //L
+    AddQuad( point4, point0, point7, point3 );
 
-	//D
-	AddQuad(point4, point5, point0, point1);
+    //R
+    AddQuad( point1, point5, point2, point6 );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+    //U
+    AddQuad( point3, point2, point7, point6 );
+
+    //D
+    AddQuad( point4, point5, point0, point1 );
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
-void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
-{
-	if (a_fRadius < 0.01f)
-		a_fRadius = 0.01f;
+void MyMesh::GenerateCuboid( vector3 a_v3Dimensions, vector3 a_v3Color ) {
+    Release();
+    Init();
 
-	if (a_fHeight < 0.01f)
-		a_fHeight = 0.01f;
+    vector3 v3Value = a_v3Dimensions * 0.5f;
+    //3--2
+    //|  |
+    //0--1
+    vector3 point0( -v3Value.x, -v3Value.y, v3Value.z ); //0
+    vector3 point1( v3Value.x, -v3Value.y, v3Value.z ); //1
+    vector3 point2( v3Value.x, v3Value.y, v3Value.z ); //2
+    vector3 point3( -v3Value.x, v3Value.y, v3Value.z ); //3
 
-	if (a_nSubdivisions < 3)
-		a_nSubdivisions = 3;
-	if (a_nSubdivisions > 360)
-		a_nSubdivisions = 360;
+    vector3 point4( -v3Value.x, -v3Value.y, -v3Value.z ); //4
+    vector3 point5( v3Value.x, -v3Value.y, -v3Value.z ); //5
+    vector3 point6( v3Value.x, v3Value.y, -v3Value.z ); //6
+    vector3 point7( -v3Value.x, v3Value.y, -v3Value.z ); //7
 
-	Release();
-	Init();
+    //F
+    AddQuad( point0, point1, point3, point2 );
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+    //B
+    AddQuad( point5, point4, point6, point7 );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+    //L
+    AddQuad( point4, point0, point7, point3 );
+
+    //R
+    AddQuad( point1, point5, point2, point6 );
+
+    //U
+    AddQuad( point3, point2, point7, point6 );
+
+    //D
+    AddQuad( point4, point5, point0, point1 );
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
-void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
-{
-	if (a_fRadius < 0.01f)
-		a_fRadius = 0.01f;
+void MyMesh::GenerateCone( float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color ) {
+    if ( a_fRadius < 0.01f )
+        a_fRadius = 0.01f;
 
-	if (a_fHeight < 0.01f)
-		a_fHeight = 0.01f;
+    if ( a_fHeight < 0.01f )
+        a_fHeight = 0.01f;
 
-	if (a_nSubdivisions < 3)
-		a_nSubdivisions = 3;
-	if (a_nSubdivisions > 360)
-		a_nSubdivisions = 360;
+    if ( a_nSubdivisions < 3 )
+        a_nSubdivisions = 3;
+    if ( a_nSubdivisions > 360 )
+        a_nSubdivisions = 360;
 
-	Release();
-	Init();
+    Release();
+    Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+    // Replace this with your code
+    float halfHeight = a_fHeight / 2;
+    vector3 centerTopVertex = vector3( 0.0f, 0.0f, halfHeight );
+    vector3 centerBottomVertex = vector3( 0.0f, 0.0f, -halfHeight );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+    // rotate around the cone generating verticies
+    for ( int i = 0; i < a_nSubdivisions; i++ ) {
+        float currentAngle = 2 * PI / a_nSubdivisions * i;
+        float nextAngle = 2 * PI / a_nSubdivisions * ( i + 1 );
+
+        vector3 firstVertex = vector3( a_fRadius * cosf( -currentAngle ), a_fRadius * sinf( -currentAngle ), -halfHeight );
+        vector3 secondVertex = vector3( a_fRadius * cosf( -nextAngle ), a_fRadius * sinf( -nextAngle ), -halfHeight );
+
+        // make the bottom circle
+        AddTri( firstVertex, secondVertex, centerBottomVertex );
+        // make the top part of the cone
+        AddTri( secondVertex, firstVertex, centerTopVertex );
+    }
+    // -------------------------------
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
-void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
-{
-	if (a_fOuterRadius < 0.01f)
-		a_fOuterRadius = 0.01f;
 
-	if (a_fInnerRadius < 0.005f)
-		a_fInnerRadius = 0.005f;
+void MyMesh::GenerateCylinder( float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color ) {
+    if ( a_fRadius < 0.01f )
+        a_fRadius = 0.01f;
 
-	if (a_fInnerRadius > a_fOuterRadius)
-		std::swap(a_fInnerRadius, a_fOuterRadius);
+    if ( a_fHeight < 0.01f )
+        a_fHeight = 0.01f;
 
-	if (a_fHeight < 0.01f)
-		a_fHeight = 0.01f;
+    if ( a_nSubdivisions < 3 )
+        a_nSubdivisions = 3;
+    if ( a_nSubdivisions > 360 )
+        a_nSubdivisions = 360;
 
-	if (a_nSubdivisions < 3)
-		a_nSubdivisions = 3;
-	if (a_nSubdivisions > 360)
-		a_nSubdivisions = 360;
+    Release();
+    Init();
 
-	Release();
-	Init();
+    // Replace this with your code
+    float halfHeight = a_fHeight / 2;
+    vector3 centerTopVertex = vector3( 0.0f, 0.0f, halfHeight );
+    vector3 centerBottomVertex = vector3( 0.0f, 0.0f, -halfHeight );
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+    // rotate around the cylinder generating verticies
+    for ( int i = 0; i < a_nSubdivisions; i++ ) {
+        float currentAngle = 2 * PI / a_nSubdivisions * i;
+        float nextAngle = 2 * PI / a_nSubdivisions * ( i + 1 );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+        // the top verticies
+        vector3 firstTopVertex = vector3( a_fRadius * cosf( currentAngle ), a_fRadius * sinf( currentAngle ), halfHeight );
+        vector3 secondTopVertex = vector3( a_fRadius * cosf( nextAngle ), a_fRadius * sinf( nextAngle ), halfHeight );
+
+        // the bottom verticies
+        vector3 firstBottomVertex = vector3( a_fRadius * cosf( -currentAngle ), a_fRadius * sinf( -currentAngle ), -halfHeight );
+        vector3 secondBottomVertex = vector3( a_fRadius * cosf( -nextAngle ), a_fRadius * sinf( -nextAngle ), -halfHeight );
+
+        // make the top circle
+        AddTri( firstTopVertex, secondTopVertex, centerTopVertex );
+        // make the bottom circle
+        AddTri( firstBottomVertex, secondBottomVertex, centerBottomVertex );
+        // make the rectangles of the cylinder
+        AddQuad( vector3( firstTopVertex.x, firstTopVertex.y, -halfHeight ),
+                 vector3( secondTopVertex.x, secondTopVertex.y, -halfHeight ),
+                 firstTopVertex,
+                 secondTopVertex );
+
+    }
+    // -------------------------------
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
-void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSubdivisionsA, int a_nSubdivisionsB, vector3 a_v3Color)
-{
-	if (a_fOuterRadius < 0.01f)
-		a_fOuterRadius = 0.01f;
+void MyMesh::GenerateTube( float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color ) {
+    if ( a_fOuterRadius < 0.01f )
+        a_fOuterRadius = 0.01f;
 
-	if (a_fInnerRadius < 0.005f)
-		a_fInnerRadius = 0.005f;
+    if ( a_fInnerRadius < 0.005f )
+        a_fInnerRadius = 0.005f;
 
-	if (a_fInnerRadius > a_fOuterRadius)
-		std::swap(a_fInnerRadius, a_fOuterRadius);
+    if ( a_fInnerRadius > a_fOuterRadius )
+        std::swap( a_fInnerRadius, a_fOuterRadius );
 
-	if (a_nSubdivisionsA < 3)
-		a_nSubdivisionsA = 3;
-	if (a_nSubdivisionsA > 360)
-		a_nSubdivisionsA = 360;
+    if ( a_fHeight < 0.01f )
+        a_fHeight = 0.01f;
 
-	if (a_nSubdivisionsB < 3)
-		a_nSubdivisionsB = 3;
-	if (a_nSubdivisionsB > 360)
-		a_nSubdivisionsB = 360;
+    if ( a_nSubdivisions < 3 )
+        a_nSubdivisions = 3;
+    if ( a_nSubdivisions > 360 )
+        a_nSubdivisions = 360;
 
-	Release();
-	Init();
+    Release();
+    Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+    // Replace this with your code
+    float halfHeight = a_fHeight / 2;
+    vector3 centerTopVertex = vector3( 0.0f, 0.0f, halfHeight );
+    vector3 centerBottomVertex = vector3( 0.0f, 0.0f, -halfHeight );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+    // rotate around the tube to generate the verticies
+    for ( int i = 0; i < a_nSubdivisions; i++ ) {
+        float currentAngle = 2 * PI / a_nSubdivisions * i;
+        float nextAngle = 2 * PI / a_nSubdivisions * ( i + 1 );
+
+        // the verticies for the top inner ring
+        vector3 firstInnerTopVertex = vector3( a_fInnerRadius * cosf( currentAngle ), a_fInnerRadius * sinf( currentAngle ), halfHeight );
+        vector3 secondInnerTopVertex = vector3( a_fInnerRadius * cosf( nextAngle ), a_fInnerRadius * sinf( nextAngle ), halfHeight );
+
+        // the verticies for the top outer ring
+        vector3 firstOuterTopVertex = vector3( a_fOuterRadius * cosf( currentAngle ), a_fOuterRadius * sinf( currentAngle ), halfHeight );
+        vector3 secondOuterTopVertex = vector3( a_fOuterRadius * cosf( nextAngle ), a_fOuterRadius * sinf( nextAngle ), halfHeight );
+
+        // the verticies for the bottom inner ring
+        vector3 firstInnerBottomVertex = vector3( a_fInnerRadius * cosf( -currentAngle ), a_fInnerRadius * sinf( -currentAngle ), -halfHeight );
+        vector3 secondInnerBottomVertex = vector3( a_fInnerRadius * cosf( -nextAngle ), a_fInnerRadius * sinf( -nextAngle ), -halfHeight );
+
+        // the verticies for the bottom outer ring
+        vector3 firstOuterBottomVertex = vector3( a_fOuterRadius * cosf( -currentAngle ), a_fOuterRadius * sinf( -currentAngle ), -halfHeight );
+        vector3 secondOuterBottomVertex = vector3( a_fOuterRadius * cosf( -nextAngle ), a_fOuterRadius * sinf( -nextAngle ), -halfHeight );
+
+        // top rectangle generation
+        AddQuad( firstOuterTopVertex, secondOuterTopVertex, firstInnerTopVertex, secondInnerTopVertex );
+        // bottom rectangle generation
+        AddQuad( firstOuterBottomVertex, secondOuterBottomVertex, firstInnerBottomVertex, secondInnerBottomVertex );
+        // outer rectangle generation
+        AddQuad( vector3( firstOuterTopVertex.x, firstOuterTopVertex.y, -halfHeight ),
+                 vector3( secondOuterTopVertex.x, secondOuterTopVertex.y, -halfHeight ),
+                 firstOuterTopVertex,
+                 secondOuterTopVertex );
+        // inner rectangle generation
+        AddQuad( firstInnerBottomVertex,
+                 secondInnerBottomVertex,
+                 vector3( firstInnerBottomVertex.x, firstInnerBottomVertex.y, halfHeight ),
+                 vector3( secondInnerBottomVertex.x, secondInnerBottomVertex.y, halfHeight ) );
+    }
+    // -------------------------------
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
-void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
-{
-	if (a_fRadius < 0.01f)
-		a_fRadius = 0.01f;
+// TODO CGS Add doc headers
+float MyMesh::CalculateTorusX( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle ) {
+    return ( midpointRadius + tubeRadius * cosf( tubeAngle ) ) * cosf( torusAngle );
+}
+float MyMesh::CalculateTorusY( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle ) {
+    return ( midpointRadius + tubeRadius * cosf( tubeAngle ) ) * sinf( torusAngle );
+}
 
-	//Sets minimum and maximum of subdivisions
-	if (a_nSubdivisions < 1)
-	{
-		GenerateCube(a_fRadius * 2.0f, a_v3Color);
-		return;
-	}
-	if (a_nSubdivisions > 6)
-		a_nSubdivisions = 6;
+void MyMesh::GenerateTorus( float a_fOuterRadius, float a_fInnerRadius, int a_nSubdivisionsA, int a_nSubdivisionsB, vector3 a_v3Color ) {
+    if ( a_fOuterRadius < 0.01f )
+        a_fOuterRadius = 0.01f;
 
-	Release();
-	Init();
+    if ( a_fInnerRadius < 0.005f )
+        a_fInnerRadius = 0.005f;
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+    if ( a_fInnerRadius > a_fOuterRadius )
+        std::swap( a_fInnerRadius, a_fOuterRadius );
 
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
+    if ( a_nSubdivisionsA < 3 )
+        a_nSubdivisionsA = 3;
+    if ( a_nSubdivisionsA > 360 )
+        a_nSubdivisionsA = 360;
+
+    if ( a_nSubdivisionsB < 3 )
+        a_nSubdivisionsB = 3;
+    if ( a_nSubdivisionsB > 360 )
+        a_nSubdivisionsB = 360;
+
+    Release();
+    Init();
+
+    // Replace this with your code
+
+    float tubeRadius = ( a_fOuterRadius - a_fInnerRadius ) / 2;
+    float midpointRadius = tubeRadius + a_fInnerRadius;
+
+    // Rotate around the torus making verticies
+    for ( int i = 0; i < a_nSubdivisionsA; i++ ) {
+        float currentTorusAngle = 2 * PI / a_nSubdivisionsA * i;
+        float nextTorusAngle = 2 * PI / a_nSubdivisionsA * ( i + 1 );
+
+        // Build the tube at each rotation point
+        for ( int j = 0; j < a_nSubdivisionsB; j++ ) {
+            float currentTubeAngle = 2 * PI / a_nSubdivisionsA * j;
+            float nextTubeAngle = 2 * PI / a_nSubdivisionsA * ( j + 1 );
+
+            // the batch of verticies for the first torus angle
+            vector3 firstTorusFirstTubeVertex = vector3( CalculateTorusX( midpointRadius, tubeRadius, currentTubeAngle, currentTorusAngle ),
+                                                         CalculateTorusY( midpointRadius, tubeRadius, currentTubeAngle, currentTorusAngle ) ,
+                                                         tubeRadius * sinf( currentTubeAngle ) );
+            vector3 firstTorusSecondTubeVertex = vector3( CalculateTorusX( midpointRadius, tubeRadius, nextTubeAngle, currentTorusAngle ),
+                                                          CalculateTorusY( midpointRadius, tubeRadius, nextTubeAngle, currentTorusAngle ),
+                                                          tubeRadius * sinf( nextTubeAngle ) );
+
+            // the batch of verticies for the second torus angle
+            vector3 secondTorusFirstTubeVertex = vector3( CalculateTorusX( midpointRadius, tubeRadius, currentTubeAngle, nextTorusAngle ),
+                                                          CalculateTorusY( midpointRadius, tubeRadius, currentTubeAngle, nextTorusAngle ),
+                                                          tubeRadius * sinf( currentTubeAngle ) );
+            vector3 secondTorusSecondTubeVertex = vector3( CalculateTorusX( midpointRadius, tubeRadius, nextTubeAngle, nextTorusAngle ),
+                                                           CalculateTorusY( midpointRadius, tubeRadius, nextTubeAngle, nextTorusAngle ),
+                                                           tubeRadius * sinf( nextTubeAngle ) );
+            
+            AddQuad( secondTorusFirstTubeVertex,
+                     secondTorusSecondTubeVertex,
+                     firstTorusFirstTubeVertex,
+                     firstTorusSecondTubeVertex );
+        }
+
+    }
+    // -------------------------------
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
+}
+void MyMesh::GenerateSphere( float a_fRadius, int a_nSubdivisions, vector3 a_v3Color ) {
+    if ( a_fRadius < 0.01f )
+        a_fRadius = 0.01f;
+
+    // TODO CGS Might need to account for 1 subdivisions
+    //Sets minimum and maximum of subdivisions
+    if ( a_nSubdivisions < 3 ) {
+        a_nSubdivisions = 3;
+    }
+    // if ( a_nSubdivisions > 6 )
+    //    a_nSubdivisions = 6;
+    
+    Release();
+    Init();
+
+    // Replace this with your code
+    int numVerticalDivisions = a_nSubdivisions;
+    int numHorizontalDivisions = a_nSubdivisions;
+
+    float subdivisionHeight = 2 * a_fRadius / numVerticalDivisions;
+    float subdivisionRadiusStep = 2 / ( (float) numVerticalDivisions );
+
+    // rotate around the sphere generating verticies
+    for ( int vertStep = 0; vertStep < numVerticalDivisions; vertStep++ ) {
+        // easier to subtract the current height from radius so that we don't half to worry about half the sphere in positive y, half in negative while building it.
+        float upperHeight = a_fRadius - subdivisionHeight * vertStep;
+        float lowerHeight = a_fRadius - subdivisionHeight * ( vertStep + 1 );
+
+        vector3 upperCenterVertex = vector3( 0.0f, 0.0f, upperHeight );
+        vector3 lowerCenterVertex = vector3( 0.0f, 0.0f, lowerHeight );
+
+        float upperRadius = a_fRadius * sqrt( 1 - pow( subdivisionRadiusStep * vertStep - 1, 2 ) );
+        float lowerRadius = a_fRadius * sqrt( 1 - pow( subdivisionRadiusStep * ( vertStep + 1 ) - 1, 2 ) );
+
+        // connect each circular layer to the next layer, in a series of horizontal divisions
+        for ( int horizStep = 0; horizStep < numHorizontalDivisions; horizStep++ ) {
+            float subdivisionRadians = 2 * PI / numHorizontalDivisions;
+            float currentAngle = subdivisionRadians * horizStep;
+            float nextAngle = subdivisionRadians * ( horizStep + 1 );
+
+            // first layer has to use triangles pointed to upper center
+            if ( vertStep == 0 ) {
+                vector3 firstVertex = vector3( lowerRadius * cosf( currentAngle ), lowerRadius * sinf( currentAngle ), lowerHeight );
+                vector3 secondVertex = vector3( lowerRadius * cosf( nextAngle ), lowerRadius * sinf( nextAngle ), lowerHeight );
+
+                AddTri( firstVertex, secondVertex, upperCenterVertex );
+            // last layer has to use triangles pointed to lower center
+            } else if ( vertStep == numVerticalDivisions - 1 ) {
+                vector3 firstVertex = vector3( upperRadius * cosf( currentAngle ), upperRadius * sinf( currentAngle ), upperHeight );
+                vector3 secondVertex = vector3( upperRadius * cosf( nextAngle ), upperRadius * sinf( nextAngle ), upperHeight );
+
+                AddTri( secondVertex, firstVertex, lowerCenterVertex );
+            // any other layer uses quads between the upper and lower layer
+            } else {
+                vector3 firstUpperVertex = vector3( upperRadius * cosf( currentAngle ), upperRadius * sinf( currentAngle ), upperHeight );
+                vector3 secondUpperVertex = vector3( upperRadius * cosf( nextAngle ), upperRadius * sinf( nextAngle ), upperHeight );
+
+                vector3 firstLowerVertex = vector3( lowerRadius * cosf( currentAngle ), lowerRadius * sinf( currentAngle ), lowerHeight );
+                vector3 secondLowerVertex = vector3( lowerRadius * cosf( nextAngle ), lowerRadius * sinf( nextAngle ), lowerHeight );
+
+                AddQuad( firstLowerVertex,
+                         secondLowerVertex,
+                         firstUpperVertex,
+                         secondUpperVertex );
+            }
+
+        }
+    }
+    // -------------------------------
+
+    // Adding information about color
+    CompleteMesh( a_v3Color );
+    CompileOpenGL3X();
 }
