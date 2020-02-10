@@ -412,7 +412,6 @@ void MyMesh::GenerateTube( float a_fOuterRadius, float a_fInnerRadius, float a_f
     CompleteMesh( a_v3Color );
     CompileOpenGL3X();
 }
-// TODO CGS Add doc headers
 float MyMesh::CalculateTorusX( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle ) {
     return ( midpointRadius + tubeRadius * cosf( tubeAngle ) ) * cosf( torusAngle );
 }
@@ -491,14 +490,11 @@ void MyMesh::GenerateSphere( float a_fRadius, int a_nSubdivisions, vector3 a_v3C
     if ( a_fRadius < 0.01f )
         a_fRadius = 0.01f;
 
-    // TODO CGS Might need to account for 1 subdivisions
-    //Sets minimum and maximum of subdivisions
+    // Sets minimum number of subdivisions
     if ( a_nSubdivisions < 3 ) {
         a_nSubdivisions = 3;
     }
-    // if ( a_nSubdivisions > 6 )
-    //    a_nSubdivisions = 6;
-    
+
     Release();
     Init();
 

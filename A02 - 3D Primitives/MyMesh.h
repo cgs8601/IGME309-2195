@@ -194,6 +194,15 @@ public:
 	OUTPUT: ---
 	*/
 	void GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color = C_WHITE);
+
+	/* 
+	USAGE: Calculates the X/Y position of the torus for a given set of parameters
+	ARGUMENTS:
+	-    float midpointRadius -> the radius of the midpoint between the outer and inner torus radii
+	-    float tubeRadius -> the radius of the tube
+	-    float tubeAngle  -> the current angle in regards to the tube wall
+	-    float torusAngle -> the current angle in regards to the torus
+	*/
 	float CalculateTorusX( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle );
 	float CalculateTorusY( float midpointRadius, float tubeRadius, float tubeAngle, float torusAngle );
 	/*
