@@ -416,28 +416,39 @@ void Application::ProcessKeyboard(void)
 #pragma endregion
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
 	{
-		if (fMultiplier)
-			m_v3Rotation.x -= 1.0f;
-		else
-			m_v3Rotation.x += 1.0f;
+		float deltaX;
+		if ( fMultiplier ) {
+			deltaX = -1.0f;
+		} else {
+			deltaX = 1.0f;
+		}
+		m_qOrientation = angleAxis( glm::radians( deltaX ), AXIS_X ) * m_qOrientation;
+
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
 	{
-		if (fMultiplier)
-			m_v3Rotation.y -= 1.0f;
-		else
-			m_v3Rotation.y += 1.0f;
+		float deltaY;
+		if ( fMultiplier ) {
+			deltaY = -1.0f;
+		}
+		else {
+			deltaY = 1.0f;
+		}
+		m_qOrientation = angleAxis( glm::radians( deltaY ), AXIS_Y ) * m_qOrientation;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
 	{
-		if (fMultiplier)
-			m_v3Rotation.z -= 1.0f;
-		else
-			m_v3Rotation.z += 1.0f;
+		float deltaZ;
+		if ( fMultiplier ) {
+			deltaZ = -1.0f;
+		} else {
+			deltaZ = 1.0f;
+		}
+		m_qOrientation = angleAxis( glm::radians( deltaZ ), AXIS_Z ) * m_qOrientation;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
 	{
-		m_v3Rotation = vector3(0.0f);
+		m_qOrientation = glm::angleAxis( 0.0f, AXIS_X );
 	}
 }
 //Joystick
