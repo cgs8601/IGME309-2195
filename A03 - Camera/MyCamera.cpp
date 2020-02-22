@@ -123,8 +123,11 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 {
 	m_v3Position = a_v3Position;
 	m_v3Target = a_v3Target;
+	m_qForward = glm::quat( glm::normalize( m_v3Target - m_v3Position ) );
 
+	vector3 normalizedAbove = glm::normalize( a_v3Upward );
 	m_v3Above = a_v3Position + glm::normalize(a_v3Upward);
+	m_qUp = glm::quat( normalizedAbove );
 	
 	//Calculate the Matrix
 	CalculateProjectionMatrix();
@@ -179,13 +182,20 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 
 void MyCamera::ChangeYaw( float a_fAngle ) {
 	// TODO CGS
-	m_v3Target = glm::rotateX( m_v3Target - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateX( m_v3Above - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qForward;
+	m_v3Target = vector3( m_qForward.x + m_v3Position.x, m_qForward.y + m_v3Position.y, m_qForward.z + m_v3Position.z);
+
+	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qUp;
+	m_v3Above = vector3( m_qUp.x + m_v3Position.x, m_qUp.y + m_v3Position.y, m_qUp.z + m_v3Position.z );
+
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
 	// TODO CGS
-	m_v3Target = glm::rotateY( m_v3Target - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateY( m_v3Above - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qForward;
+	m_v3Target = vector3( m_qForward.x + m_v3Position.x, m_qForward.y + m_v3Position.y, m_qForward.z + m_v3Position.z );
+
+	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qUp;
+	m_v3Above = vector3( m_qUp.x + m_v3Position.x, m_qUp.y + m_v3Position.y, m_qUp.z + m_v3Position.z );
 }
 

@@ -15,6 +15,9 @@ class MyCamera
 	vector3 m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
 	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
+	quaternion m_qUp = glm::quat( m_v3Above );
+	quaternion m_qForward = glm::quat( glm::normalize( m_v3Target - m_v3Position ) );
+
 	bool m_bPerspective = true; //perspective view? False is Orthographic
 
 	float m_fFOV = 45.0f; //Field of View
