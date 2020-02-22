@@ -13,8 +13,8 @@ namespace Simplex
 class MyCamera
 {
 	vector3 m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
-	vector3 m_qTarget = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
-	vector3 m_qAbove = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
+	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
+	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
 	bool m_bPerspective = true; //perspective view? False is Orthographic
 
 	float m_fFOV = 45.0f; //Field of View
@@ -106,28 +106,28 @@ public:
 	ARGUMENTS: vector3 a_v3Target -> What we want the camera to look at
 	OUTPUT: ---
 	*/
-	void SetTarget(vector3 a_qTarget);
+	void SetTarget(vector3 a_v3Target);
 
 	/*
 	USAGE: Gets what the camera will be looking at
 	ARGUMENTS: ---
 	OUTPUT: target of the camera
 	*/
-	quaternion GetTarget(void);
+	vector3 GetTarget(void);
 
 	/*
 	USAGE: Sets the position of the point above the camera
 	ARGUMENTS: vector3 a_v3Above -> The point that is above the camera position
 	OUTPUT: ---
 	*/
-	void SetAbove(vector3 a_qAbove);
+	void SetAbove(vector3 a_v3Above);
 
 	/*
 	USAGE: Gets the position of the point above camera
 	ARGUMENTS: ---
 	OUTPUT: position above the camera
 	*/
-	quaternion GetAbove(void);
+	vector3 GetAbove(void);
 
 	/*
 	USAGE: Sets Perspective Camera
