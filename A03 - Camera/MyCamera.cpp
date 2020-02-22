@@ -4,10 +4,10 @@ using namespace Simplex;
 //Accessors
 void Simplex::MyCamera::SetPosition(vector3 a_v3Position) { m_v3Position = a_v3Position; }
 vector3 Simplex::MyCamera::GetPosition(void) { return m_v3Position; }
-void Simplex::MyCamera::SetTarget(vector3 a_v3Target) { m_v3Target = a_v3Target; }
-vector3 Simplex::MyCamera::GetTarget(void) { return m_v3Target; }
-void Simplex::MyCamera::SetAbove(vector3 a_v3Above) { m_v3Above = a_v3Above; }
-vector3 Simplex::MyCamera::GetAbove(void) { return m_v3Above; }
+void Simplex::MyCamera::SetTarget(vector3 a_v3Target) { m_qTarget = a_v3Target; }
+quaternion Simplex::MyCamera::GetTarget(void) { return m_qTarget; }
+void Simplex::MyCamera::SetAbove(vector3 a_v3Above) { m_qAbove = a_v3Above; }
+quaternion Simplex::MyCamera::GetAbove(void) { return m_qAbove; }
 void Simplex::MyCamera::SetPerspective(bool a_bPerspective) { m_bPerspective = a_bPerspective; }
 void Simplex::MyCamera::SetFOV(float a_fFOV) { m_fFOV = a_fFOV; }
 void Simplex::MyCamera::SetResolution(vector2 a_v2Resolution) { m_v2Resolution = a_v2Resolution; }
@@ -31,8 +31,8 @@ Simplex::MyCamera::MyCamera(vector3 a_v3Position, vector3 a_v3Target, vector3 a_
 Simplex::MyCamera::MyCamera(MyCamera const& other)
 {
 	m_v3Position = other.m_v3Position;
-	m_v3Target = other.m_v3Target;
-	m_v3Above = other.m_v3Above;
+	m_qTarget = other.m_qTarget;
+	m_qAbove = other.m_qAbove;
 
 	m_bPerspective = other.m_bPerspective;
 
@@ -53,7 +53,7 @@ MyCamera& Simplex::MyCamera::operator=(MyCamera const& other)
 	if (this != &other)
 	{
 		Release();
-		SetPositionTargetAndUpward(other.m_v3Position, other.m_v3Target, other.m_v3Above);
+		SetPositionTargetAndUpward(other.m_v3Position, other.m_qTarget, other.m_qAbove);
 		MyCamera temp(other);
 		Swap(temp);
 	}
@@ -76,8 +76,8 @@ void Simplex::MyCamera::Release(void)
 void Simplex::MyCamera::Swap(MyCamera & other)
 {
 	std::swap(m_v3Position, other.m_v3Position);
-	std::swap(m_v3Target, other.m_v3Target);
-	std::swap(m_v3Above, other.m_v3Above);
+	std::swap(m_qTarget, other.m_qTarget);
+	std::swap(m_qAbove, other.m_qAbove);
 	
 	std::swap(m_bPerspective, other.m_bPerspective);
 
@@ -101,8 +101,8 @@ Simplex::MyCamera::~MyCamera(void)
 void Simplex::MyCamera::ResetCamera(void)
 {
 	m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
-	m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
-	m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
+	m_qTarget = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
+	m_qAbove = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
 
 
 	m_bPerspective = true; //perspective view? False is Orthographic
@@ -122,9 +122,9 @@ void Simplex::MyCamera::ResetCamera(void)
 void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3 a_v3Target, vector3 a_v3Upward)
 {
 	m_v3Position = a_v3Position;
-	m_v3Target = a_v3Target;
+	m_qTarget = a_v3Target;
 
-	m_v3Above = a_v3Position + glm::normalize(a_v3Upward);
+	m_qAbove = a_v3Position + glm::normalize(a_v3Upward);
 	
 	//Calculate the Matrix
 	CalculateProjectionMatrix();
@@ -135,7 +135,7 @@ void Simplex::MyCamera::CalculateViewMatrix(void)
 	// Calculate the look at, most of your assignment will be reflected in this method
 	// TODO CGS Handle mouse rotation
 
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
+	m_m4View = glm::lookAt(m_v3Position, m_qTarget, glm::normalize(m_qAbove - m_v3Position)); //position, target, upward
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
@@ -155,37 +155,37 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 
 void MyCamera::MoveForward( float a_fDistance ) {
 	// TODO CGS Make it move in relation to the camera
-	vector3 v3ForwardDistance = glm::normalize( m_v3Target - m_v3Position ) * a_fDistance;
+	vector3 v3ForwardDistance = glm::normalize( m_qTarget - m_v3Position ) * a_fDistance;
 	m_v3Position += v3ForwardDistance;
-	m_v3Target += v3ForwardDistance;
-	m_v3Above += v3ForwardDistance;
+	m_qTarget += v3ForwardDistance;
+	m_qAbove += v3ForwardDistance;
 }
 
 void MyCamera::MoveVertical( float a_fDistance ){
 	// TODO CGS Make it move in relation to the camera
-	vector3 v3VerticalDistance = glm::normalize( m_v3Above - m_v3Position ) * a_fDistance;
+	vector3 v3VerticalDistance = glm::normalize( m_qAbove - m_v3Position ) * a_fDistance;
 	m_v3Position += v3VerticalDistance;
-	m_v3Target += v3VerticalDistance;
-	m_v3Above += v3VerticalDistance;
+	m_qTarget += v3VerticalDistance;
+	m_qAbove += v3VerticalDistance;
 }
 void MyCamera::MoveSideways( float a_fDistance ) {
 	// TODO CGS Make it move in relation to the camera
 
-	vector3 v3HorizontalDistance = glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) * a_fDistance;
+	vector3 v3HorizontalDistance = glm::cross( glm::normalize( m_qTarget - m_v3Position ), glm::normalize( m_qAbove - m_v3Position ) ) * a_fDistance;
 	m_v3Position += v3HorizontalDistance;
-	m_v3Target += v3HorizontalDistance;
-	m_v3Above += v3HorizontalDistance;
+	m_qTarget += v3HorizontalDistance;
+	m_qAbove += v3HorizontalDistance;
 }
 
 void MyCamera::ChangeYaw( float a_fAngle ) {
 	// TODO CGS
-	m_v3Target = glm::rotateX( m_v3Target - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateX( m_v3Above - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+	m_qTarget = glm::rotateX( m_qTarget - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+	m_qAbove = glm::rotateX( m_qAbove - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
 	// TODO CGS
-	m_v3Target = glm::rotateY( m_v3Target - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateY( m_v3Above - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+	m_qTarget = glm::rotateY( m_qTarget - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+	m_qAbove = glm::rotateY( m_qAbove - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
 }
 
