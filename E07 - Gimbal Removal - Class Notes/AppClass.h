@@ -7,7 +7,6 @@ Date: 2017/05
 
 #include "Definitions.h"
 
-#include <iostream>
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
 
@@ -15,17 +14,12 @@ Date: 2017/05
 
 class Application
 {
-	vector3 v3Rotation;
-
+	matrix4 m_m4Model = IDENTITY_M4;
+	quaternion m_qOrientation;
+	vector3 m_v3Rotation;
 	MyMesh* m_pMesh = nullptr;
-	MyMesh* m_pMesh1 = nullptr;
-
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 
-	// BEGIN PROJECTION EXPERIMENTING
-	vector3 m_pos = vector3(0.0f, 0.0f, 35.0f);
-	vector3 m_target;
-	// END PROJECTION EXPERIMENTING
 private:
 	static ImGuiObject gui; //GUI object
 

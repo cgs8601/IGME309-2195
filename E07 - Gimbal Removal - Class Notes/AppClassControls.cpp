@@ -377,8 +377,8 @@ void Application::CameraRotation(float a_fSpeed)
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
 	//Change the Yaw and the Pitch of the camera
-	m_pCameraMngr->ChangeYaw(fAngleY * 0.25f);
-	m_pCameraMngr->ChangePitch(-fAngleX * 0.25f);
+	m_pCameraMngr->ChangeYaw(fAngleY * 3.0f);
+	m_pCameraMngr->ChangePitch(-fAngleX * 3.0f);
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 //Keyboard
@@ -414,32 +414,33 @@ void Application::ProcessKeyboard(void)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 		m_pCameraMngr->MoveVertical(fSpeed);
 #pragma endregion
-	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::X ) ) {
-		if ( fMultiplier != 0.0f ) {
-			v3Rotation.x -= 1.0f;
-		} else {
-			v3Rotation.x += 1.0f;
-		}
-	}
 
-	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Y ) ) {
-		if ( fMultiplier != 0.0f ) {
-			v3Rotation.y -= 1.0f;
-		} else {
-			v3Rotation.y += 1.0f;
-		}
+	// TODO CGS Change so it doesn't get gimbol locked
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+	{
+		if (fMultiplier)
+			m_v3Rotation.x -= 1.0f;
+		else
+			m_v3Rotation.x += 1.0f;
 	}
-
-	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Z ) ) {
-		if ( fMultiplier != 0.0f ) {
-			v3Rotation.z -= 1.0f;
-		} else {
-			v3Rotation.z += 1.0f;
-		}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
+	{
+		if (fMultiplier)
+			m_v3Rotation.y -= 1.0f;
+		else
+			m_v3Rotation.y += 1.0f;
 	}
-
-	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::R ) )
-		v3Rotation = ZERO_V3;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+	{
+		if (fMultiplier)
+			m_v3Rotation.z -= 1.0f;
+		else
+			m_v3Rotation.z += 1.0f;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+	{
+		m_v3Rotation = vector3(0.0f);
+	}
 }
 //Joystick
 void Application::ProcessJoystick(void)

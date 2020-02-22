@@ -3,6 +3,7 @@ void Application::InitVariables(void)
 {
 	//init the mesh
 	m_pMesh = new MyMesh();
+	
 	//m_pMesh->GenerateCube(1.0f, C_WHITE);
 	m_pMesh->GenerateSphere(1.0f, 5, C_WHITE);
 }
