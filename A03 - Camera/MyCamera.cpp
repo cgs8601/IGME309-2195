@@ -104,6 +104,7 @@ void Simplex::MyCamera::ResetCamera(void)
 	m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
 
+
 	m_bPerspective = true; //perspective view? False is Orthographic
 
 	m_fFOV = 45.0f; //Field of View
@@ -131,7 +132,9 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
-	//Calculate the look at most of your assignment will be reflected in this method
+	// Calculate the look at, most of your assignment will be reflected in this method
+	// TODO CGS Handle mouse rotation
+
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
 }
 
@@ -150,13 +153,39 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 	}
 }
 
-void MyCamera::MoveForward(float a_fDistance)
-{
-	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
-	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
+void MyCamera::MoveForward( float a_fDistance ) {
+	// TODO CGS Make it move in relation to the camera
+	vector3 v3ForwardDistance = glm::normalize( m_v3Target - m_v3Position ) * a_fDistance;
+	m_v3Position += v3ForwardDistance;
+	m_v3Target += v3ForwardDistance;
+	m_v3Above += v3ForwardDistance;
 }
 
-void MyCamera::MoveVertical(float a_fDistance){}//Needs to be defined
-void MyCamera::MoveSideways(float a_fDistance){}//Needs to be defined
+void MyCamera::MoveVertical( float a_fDistance ){
+	// TODO CGS Make it move in relation to the camera
+	vector3 v3VerticalDistance = glm::normalize( m_v3Above - m_v3Position ) * a_fDistance;
+	m_v3Position += v3VerticalDistance;
+	m_v3Target += v3VerticalDistance;
+	m_v3Above += v3VerticalDistance;
+}
+void MyCamera::MoveSideways( float a_fDistance ) {
+	// TODO CGS Make it move in relation to the camera
+
+	vector3 v3HorizontalDistance = glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) * a_fDistance;
+	m_v3Position += v3HorizontalDistance;
+	m_v3Target += v3HorizontalDistance;
+	m_v3Above += v3HorizontalDistance;
+}
+
+void MyCamera::ChangeYaw( float a_fAngle ) {
+	// TODO CGS
+	m_v3Target = glm::rotateX( m_v3Target - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+	m_v3Above = glm::rotateX( m_v3Above - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+}
+
+void MyCamera::ChangePitch( float a_fAngle ) {
+	// TODO CGS
+	m_v3Target = glm::rotateY( m_v3Target - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+	m_v3Above = glm::rotateY( m_v3Above - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+}
+

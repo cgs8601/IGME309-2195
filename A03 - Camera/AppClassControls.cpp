@@ -368,7 +368,10 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
-	//Change the Yaw and the Pitch of the camera
+	// Change the Yaw and the Pitch of the camera
+	m_pCamera->ChangeYaw( fAngleX );
+	m_pCamera->ChangePitch( fAngleY );
+
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 //Keyboard
@@ -386,10 +389,19 @@ void Application::ProcessKeyboard(void)
 	if (fMultiplier)
 		fSpeed *= 5.0f;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		m_pCamera->MoveForward(fSpeed);
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		m_pCamera->MoveForward(-fSpeed);
+	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::W ) ) {
+		m_pCamera->MoveForward( fSpeed );
+	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::S ) ) {
+		m_pCamera->MoveForward( -fSpeed );
+	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::A ) ) {
+		m_pCamera->MoveSideways( -fSpeed );
+	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::D ) ) {
+		m_pCamera->MoveSideways( fSpeed );
+	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Q ) ) {
+		m_pCamera->MoveVertical( fSpeed );
+	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::E ) ) {
+		m_pCamera->MoveVertical( -fSpeed );
+	}
 #pragma endregion
 }
 //Joystick
@@ -425,6 +437,7 @@ void Application::ProcessJoystick(void)
 	float fVSpeed = glm::radians(m_pController[m_uActCont]->axis[SimplexAxis_V] / 150.0f);
 	m_pCameraMngr->ChangeYaw(-fUSpeed);
 	m_pCameraMngr->ChangePitch(fVSpeed);
+	
 #pragma endregion
 #pragma region ModelOrientation Orientation
 	m_qArcBall = quaternion(vector3(glm::radians(m_pController[m_uActCont]->axis[SimplexAxis_POVY] / 20.0f), 0.0f, 0.0f)) * m_qArcBall;
