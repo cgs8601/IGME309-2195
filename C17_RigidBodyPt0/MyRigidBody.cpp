@@ -63,6 +63,56 @@ void MyRigidBody::Release(void)
 MyRigidBody::MyRigidBody(std::vector<vector3> a_pointList)
 {
 	Init();
+
+	uint uSize = a_pointList.size();
+	if ( uSize < 1 ) {
+		return;
+	}
+
+	//float minX = a_pointList[0].x;
+	//float maxX = a_pointList[0].x;
+	//float minY = a_pointList[0].y;
+	//float maxY = a_pointList[0].y;
+	//float minZ = a_pointList[0].z;
+	//float maxZ = a_pointList[0].z;
+
+	vector3 minCoords = a_pointList[0];
+	vector3 maxCoords = a_pointList[0];
+
+	for ( uint i = 1; i < uSize; i++ ) {
+		vector3 currPoint = a_pointList[i];
+		if ( currPoint.x < minCoords.x ) {
+			minCoords.x = currPoint.x;
+		}
+		if ( currPoint.x > maxCoords.x ) {
+			maxCoords.x = currPoint.x;
+		}
+		if ( currPoint.y < minCoords.y ) {
+			minCoords.y = currPoint.y;
+		}
+		if ( currPoint.y > maxCoords.y ) {
+			maxCoords.y = currPoint.y;
+		}
+		if ( currPoint.z < minCoords.z ) {
+			minCoords.z = currPoint.z;
+		}
+		if ( currPoint.z < maxCoords.z ) {
+			maxCoords.z = currPoint.z;
+		}
+	}
+
+	vector3 centerPoint = vector3( ( maxCoords.x + minCoords.x ) / 2.0f, ( maxCoords.y + minCoords.y ) / 2.0f, ( maxCoords.z + minCoords.z ) / 2.0f );
+	float maxDistance = glm::distance( a_pointList[0], centerPoint );
+
+	for ( uint i = 1; i < uSize; i++ ) {
+		float currDistance = glm::distance( a_pointList[i], centerPoint );
+		if ( currDistance > maxDistance ) {
+			maxDistance = currDistance;
+		}
+	}
+	m_v3HalfWidth = ( maxCoords - minCoords ) / 2;
+	m_fRadius = maxDistance;
+	m_v3Center = centerPoint;
 }
 MyRigidBody::MyRigidBody(MyRigidBody const& other)
 {
@@ -102,6 +152,12 @@ void MyRigidBody::AddToRenderList(void)
 {
 	if (!m_bVisible)
 		return;
+	// BEGIN SOME CLASS EXPIRIMENTATION
+	// (need a non-zero radius to use this)
+	matrix4 m4Location = glm::translate( IDENTITY_M4, m_v3Center ) * glm::scale( vector3( m_fRadius ) );
+	m_pMeshMngr->AddWireSphereToRenderList( m4Location, C_RED );
+	m_pMeshMngr->AddWireCubeToRenderList( glm::translate( IDENTITY_M4, m_v3Center ) * glm::scale( m_v3HalfWidth * 2.0f ), C_BLUE );
+	// END SOME CLASS EXPIRIMENTATION
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const other)
 {

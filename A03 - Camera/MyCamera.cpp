@@ -34,6 +34,9 @@ Simplex::MyCamera::MyCamera(MyCamera const& other)
 	m_v3Target = other.m_v3Target;
 	m_v3Above = other.m_v3Above;
 
+	m_qForward = other.m_qForward;
+	m_qUp = other.m_qUp;
+
 	m_bPerspective = other.m_bPerspective;
 
 	m_fFOV = other.m_fFOV;
@@ -78,6 +81,9 @@ void Simplex::MyCamera::Swap(MyCamera & other)
 	std::swap(m_v3Position, other.m_v3Position);
 	std::swap(m_v3Target, other.m_v3Target);
 	std::swap(m_v3Above, other.m_v3Above);
+
+	std::swap( m_qForward, other.m_qForward );
+	std::swap( m_qUp, other.m_qUp );
 	
 	std::swap(m_bPerspective, other.m_bPerspective);
 
@@ -104,6 +110,8 @@ void Simplex::MyCamera::ResetCamera(void)
 	m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
 
+	m_qForward = glm::quat( glm::normalize( m_v3Target - m_v3Position ) ); // forward unit quaternion
+	m_qUp = glm::quat( m_v3Above ); // up unit quaternion
 
 	m_bPerspective = true; //perspective view? False is Orthographic
 
@@ -126,7 +134,7 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 	m_qForward = glm::quat( glm::normalize( m_v3Target - m_v3Position ) );
 
 	vector3 normalizedAbove = glm::normalize( a_v3Upward );
-	m_v3Above = a_v3Position + glm::normalize(a_v3Upward);
+	m_v3Above = a_v3Position + normalizedAbove;
 	m_qUp = glm::quat( normalizedAbove );
 	
 	//Calculate the Matrix
@@ -182,20 +190,26 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 
 void MyCamera::ChangeYaw( float a_fAngle ) {
 	// TODO CGS
-	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qForward;
-	m_v3Target = vector3( m_qForward.x + m_v3Position.x, m_qForward.y + m_v3Position.y, m_qForward.z + m_v3Position.z);
+	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qForward;
+	// TODO CGS need to actually convert the quaternion to a vector3 here, glm::eulerAngles seems promising
+	vector3 newTargetVector = glm::eulerAngles( m_qForward ) * glm::distance( m_v3Target, m_v3Position );
+	m_v3Target = vector3( m_v3Position.x + newTargetVector.x, m_v3Position.y + newTargetVector.y, m_v3Position.z + newTargetVector.z );
 
-	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qUp;
-	m_v3Above = vector3( m_qUp.x + m_v3Position.x, m_qUp.y + m_v3Position.y, m_qUp.z + m_v3Position.z );
+	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qUp;
+	vector3 newUpVector = glm::eulerAngles( m_qUp );
+	m_v3Above = vector3( newUpVector.x + m_v3Position.x, newUpVector.y + m_v3Position.y, newUpVector.z + m_v3Position.z );
 
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
 	// TODO CGS
-	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qForward;
-	m_v3Target = vector3( m_qForward.x + m_v3Position.x, m_qForward.y + m_v3Position.y, m_qForward.z + m_v3Position.z );
+	m_qForward = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qForward;
+	// TODO CGS need to actually convert the quaternion to a vector3 here, glm::eulerAngles seems promising
+	vector3 newTargetVector = glm::eulerAngles( m_qForward ) * glm::distance( m_v3Target, m_v3Position );
+	m_v3Target = vector3( m_v3Position.x + newTargetVector.x, m_v3Position.y + newTargetVector.y, m_v3Position.z + newTargetVector.z );
 
-	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_X ) * m_qUp;
-	m_v3Above = vector3( m_qUp.x + m_v3Position.x, m_qUp.y + m_v3Position.y, m_qUp.z + m_v3Position.z );
+	m_qUp = glm::angleAxis( glm::radians( -a_fAngle ), AXIS_Y ) * m_qUp;
+	vector3 newUpVector = glm::eulerAngles( m_qUp );
+	m_v3Above = vector3( newUpVector.x + m_v3Position.x, newUpVector.y + m_v3Position.y, newUpVector.z + m_v3Position.z );
 }
 

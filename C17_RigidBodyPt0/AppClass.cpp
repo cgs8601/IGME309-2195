@@ -56,6 +56,14 @@ void Application::Update(void)
 
 	//m_pSteve->AddToRenderList();
 	//m_pSteveRB->AddToRenderList();
+
+	// SOME IN-CLASS EXAMPLES:
+	//m_pMeshMngr->AddSphereToRenderList( IDENTITY_M4, C_RED, RENDER_SOLID | RENDER_WIRE);
+	// m_pMeshMngr->AddSphereToRenderList( glm::translate(0.0f, 1.0f, 0.0f), C_RED, RENDER_SOLID | RENDER_WIRE);
+	// m_pMeshMngr->AddSphereToRenderList( glm::scale( 5.0f ), C_RED, RENDER_SOLID | RENDER_WIRE );
+	//m_pMeshMngr->AddWireSphereToRenderList( IDENTITY_M4, C_RED );
+
+	// END SOME IN-CLASS Examples
 }
 void Application::Display(void)
 {
