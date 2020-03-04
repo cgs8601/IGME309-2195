@@ -13,10 +13,8 @@ namespace Simplex
 class MyCamera
 {
 	vector3 m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
-	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
-	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
-	quaternion m_qUp = glm::quat( m_v3Above );
-	quaternion m_qForward = glm::quat( glm::normalize( m_v3Target - m_v3Position ) );
+	quaternion m_qUp = glm::quat( vector3( 0.0f, 1.0f, 0.0f ) ); // What is up 
+	quaternion m_qForward = glm::quat( glm::normalize( vector3( 0.0f, 0.0f, 0.0f ) - m_v3Position ) ); // What is forward
 
 	bool m_bPerspective = true; //perspective view? False is Orthographic
 
@@ -189,6 +187,15 @@ public:
 	OUTPUT: ---
 	*/
 	void ResetCamera(void);
+	/*
+	USAGE: Set the position target and up of the camera at once
+	ARGUMENTS:
+	-	vector3 a_v3Position -> Where my camera is located
+	-	quaternion a_qForward -> What I'm looking at
+	-	quaternion -> What direction is up
+	OUTPUT: ---
+	*/
+	void SetPositionTargetAndUpward( vector3 a_v3Position, quaternion a_qForward, quaternion a_qUp );
 
 	/*
 	USAGE: Set the position target and up of the camera at once

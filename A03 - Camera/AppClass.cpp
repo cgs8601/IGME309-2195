@@ -29,7 +29,7 @@ void Application::Update(void)
 	ArcBall();
 
 	//Is the first person camera active?
-	CameraRotation( 0.01f );
+	CameraRotation( 0.05f );
 
 	//Add objects to the Manager
 	for (int j = -50; j < 50; j += 2)
