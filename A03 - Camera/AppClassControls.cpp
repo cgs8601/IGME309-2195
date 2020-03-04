@@ -389,17 +389,23 @@ void Application::ProcessKeyboard(void)
 	if (fMultiplier)
 		fSpeed *= 5.0f;
 
+	// Move Forward
 	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::W ) ) {
 		m_pCamera->MoveForward( fSpeed );
-	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::S ) ) {
+	} // Move Back 
+	else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::S ) ) {
 		m_pCamera->MoveForward( -fSpeed );
-	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::A ) ) {
+	} // Move Left
+	else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::A ) ) {
 		m_pCamera->MoveSideways( -fSpeed );
-	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::D ) ) {
+	} // Move Right 
+	else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::D ) ) {
 		m_pCamera->MoveSideways( fSpeed );
-	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Q ) ) {
+	} // Move Up 
+	else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Q ) ) {
 		m_pCamera->MoveVertical( fSpeed );
-	} else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::E ) ) {
+	} // Move Down 
+	else if ( sf::Keyboard::isKeyPressed( sf::Keyboard::E ) ) {
 		m_pCamera->MoveVertical( -fSpeed );
 	}
 #pragma endregion

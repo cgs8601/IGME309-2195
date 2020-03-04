@@ -133,8 +133,7 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
 	// Calculate the look at, most of your assignment will be reflected in this method
-	// TODO CGS Handle mouse rotation
-
+	// I'll admit, I'm not sure what was supposed to be implemented here.
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
 }
 
@@ -154,7 +153,7 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 }
 
 void MyCamera::MoveForward( float a_fDistance ) {
-	// TODO CGS Make it move in relation to the camera
+	// Move in the direction of the forward vector
 	vector3 v3ForwardDistance = glm::normalize( m_v3Target - m_v3Position ) * a_fDistance;
 	m_v3Position += v3ForwardDistance;
 	m_v3Target += v3ForwardDistance;
@@ -162,15 +161,15 @@ void MyCamera::MoveForward( float a_fDistance ) {
 }
 
 void MyCamera::MoveVertical( float a_fDistance ){
-	// TODO CGS Make it move in relation to the camera
+	// Move in the direction of the above vector
 	vector3 v3VerticalDistance = glm::normalize( m_v3Above - m_v3Position ) * a_fDistance;
 	m_v3Position += v3VerticalDistance;
 	m_v3Target += v3VerticalDistance;
 	m_v3Above += v3VerticalDistance;
 }
 void MyCamera::MoveSideways( float a_fDistance ) {
-	// TODO CGS Make it move in relation to the camera
-
+	// Move in the plane of the right vector
+	// The right vector is the cross product of the target and the above.
 	vector3 v3HorizontalDistance = glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) * a_fDistance;
 	m_v3Position += v3HorizontalDistance;
 	m_v3Target += v3HorizontalDistance;
@@ -178,13 +177,15 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 }
 
 void MyCamera::ChangeYaw( float a_fAngle ) {
-	// TODO CGS
+	// Gets the vector represented by target/above in relation to position,
+	// then rotates the x of that vector by the angle, and adds position to form the new target/above
 	m_v3Target = glm::rotateX( m_v3Target - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
 	m_v3Above = glm::rotateX( m_v3Above - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
-	// TODO CGS
+	// Gets the vector represented by target/above in relation to position,
+	// then rotates the y of that vector by the angle, and adds position to form the new target/above
 	m_v3Target = glm::rotateY( m_v3Target - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
 	m_v3Above = glm::rotateY( m_v3Above - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
 }
