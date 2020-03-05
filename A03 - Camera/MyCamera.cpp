@@ -162,6 +162,8 @@ void MyCamera::MoveForward( float a_fDistance ) {
 
 void MyCamera::MoveVertical( float a_fDistance ){
 	// Move in the direction of the above vector
+	// as we don't change the above vector with vertical rotation (under the Prof's advice for this assignment), 
+	// the vertical movement will always be in the direction the above was assigned, and not necessarily the current vertical direction
 	vector3 v3VerticalDistance = glm::normalize( m_v3Above - m_v3Position ) * a_fDistance;
 	m_v3Position += v3VerticalDistance;
 	m_v3Target += v3VerticalDistance;
@@ -169,8 +171,9 @@ void MyCamera::MoveVertical( float a_fDistance ){
 }
 void MyCamera::MoveSideways( float a_fDistance ) {
 	// Move in the plane of the right vector
-	// The right vector is the cross product of the target and the above.
-	vector3 v3HorizontalDistance = glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) * a_fDistance;
+	// The right vector is the cross product of the target and the above 
+	// (normalized so that it is constant no matter the angle between the above and the target).
+	vector3 v3HorizontalDistance = glm::normalize( glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) ) * a_fDistance;
 	m_v3Position += v3HorizontalDistance;
 	m_v3Target += v3HorizontalDistance;
 	m_v3Above += v3HorizontalDistance;
@@ -179,17 +182,27 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 void MyCamera::ChangeYaw( float a_fAngle ) {
 	// Gets the vector represented by target/above in relation to position,
 	// then rotates the x of that vector by the angle, and adds position to form the new target/above
+	vector3 rightward = glm::normalize( glm::cross( glm::normalize( m_v3Target - m_v3Position ),
+													glm::normalize( m_v3Above - m_v3Position ) ) );
+
 	m_v3Target = glm::rotate( m_v3Target - m_v3Position,
 							  -a_fAngle,
-							  glm::cross( glm::normalize( m_v3Target - m_v3Position ),
-										  glm::normalize( m_v3Above - m_v3Position ) ) ) + m_v3Position;
+							  rightward ) + m_v3Position;
+
+	// no need to change upward for rightward rotation
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
 	// Gets the vector represented by target/above in relation to position,
 	// then rotates the y of that vector by the angle, and adds position to form the new target/above
+	vector3 oldTarget = m_v3Target;
 	m_v3Target = glm::rotate( m_v3Target - m_v3Position,
 							  a_fAngle,
 							  glm::normalize( m_v3Above - m_v3Position ) ) + m_v3Position;
+
+	// I stopped trying to rotate the above after Prof said that keeping the initial above is fine for an FPS camera
+	//m_v3Above = glm::rotate( m_v3Above - m_v3Position,
+	//						 -a_fAngle,
+	//						 glm::normalize( oldTarget - m_v3Position ) ) + m_v3Position;
 }
 
