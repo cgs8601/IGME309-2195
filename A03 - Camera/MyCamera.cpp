@@ -178,7 +178,8 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 	// Move in the plane of the right vector
 	// The right vector is the cross product of the target and the above 
 	// (normalized so that it is constant no matter the angle between the above and the target).
-	vector3 v3HorizontalDistance = glm::normalize( glm::cross( glm::normalize( m_v3Target - m_v3Position ), glm::normalize( m_v3Above - m_v3Position ) ) ) * a_fDistance;
+	vector3 v3HorizontalDistance = glm::normalize( glm::cross( glm::normalize( m_v3Target - m_v3Position ),
+															   glm::normalize( m_v3Above - m_v3Position ) ) ) * a_fDistance;
 	m_v3Position += v3HorizontalDistance;
 	m_v3Target += v3HorizontalDistance;
 	m_v3Above += v3HorizontalDistance;
