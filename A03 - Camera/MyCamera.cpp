@@ -162,9 +162,14 @@ void MyCamera::MoveForward( float a_fDistance ) {
 
 void MyCamera::MoveVertical( float a_fDistance ){
 	// Move in the direction of the above vector
-	// as we don't change the above vector with vertical rotation (under the Prof's advice for this assignment), 
-	// the vertical movement will always be in the direction the above was assigned, and not necessarily the current vertical direction
-	vector3 v3VerticalDistance = glm::normalize( m_v3Above - m_v3Position ) * a_fDistance;
+	// Since we don't need to rotate the above vector for an FPS camera (under Proffesor's guidance for this assigment),
+	// we need to calculate where the upward should be, i.e. rotating the target vector 90 degrees around the rightward vector.
+	vector3 rightward = glm::normalize( glm::cross( glm::normalize( m_v3Target - m_v3Position ),
+													glm::normalize( m_v3Above - m_v3Position ) ) );
+
+	vector3 v3VerticalDistance = glm::normalize( glm::rotate( glm::normalize( m_v3Target - m_v3Position), 
+															  glm::radians( 90.0f ),
+															  rightward ) ) * a_fDistance;
 	m_v3Position += v3VerticalDistance;
 	m_v3Target += v3VerticalDistance;
 	m_v3Above += v3VerticalDistance;
