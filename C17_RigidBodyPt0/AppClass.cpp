@@ -36,6 +36,8 @@ void Application::Update(void)
 	//Is the first person camera active?
 	CameraRotation();
 
+	// BEGIN CLASS EXPERIMENTATION
+
 	//reset the color of the rigid bodies to white 
 	m_pCreeperRB->SetColor(C_WHITE);
 	//m_pSteveRB->SetColor(C_WHITE);
@@ -49,6 +51,9 @@ void Application::Update(void)
 	m_pSteve->SetModelMatrix(mSteve);
 	//m_pSteveRB->SetModelMatrix(mSteve);
 	
+	if ( m_pCreeperRB->IsColliding( m_pSteveRB ) ) {
+		m_pCreeperRB->SetColor( C_RED );
+	}
 
 	m_pCreeper->AddToRenderList();
 	//m_pCreeper->PlaySequence();
@@ -56,6 +61,8 @@ void Application::Update(void)
 
 	//m_pSteve->AddToRenderList();
 	//m_pSteveRB->AddToRenderList();
+
+	// END CLASS EXPERIMENTATION
 }
 void Application::Display(void)
 {

@@ -179,14 +179,17 @@ void MyCamera::MoveSideways( float a_fDistance ) {
 void MyCamera::ChangeYaw( float a_fAngle ) {
 	// Gets the vector represented by target/above in relation to position,
 	// then rotates the x of that vector by the angle, and adds position to form the new target/above
-	m_v3Target = glm::rotateX( m_v3Target - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateX( m_v3Above - m_v3Position, glm::radians( -a_fAngle ) ) + m_v3Position;
+	m_v3Target = glm::rotate( m_v3Target - m_v3Position,
+							  -a_fAngle,
+							  glm::cross( glm::normalize( m_v3Target - m_v3Position ),
+										  glm::normalize( m_v3Above - m_v3Position ) ) ) + m_v3Position;
 }
 
 void MyCamera::ChangePitch( float a_fAngle ) {
 	// Gets the vector represented by target/above in relation to position,
 	// then rotates the y of that vector by the angle, and adds position to form the new target/above
-	m_v3Target = glm::rotateY( m_v3Target - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
-	m_v3Above = glm::rotateY( m_v3Above - m_v3Position, glm::radians( a_fAngle ) ) + m_v3Position;
+	m_v3Target = glm::rotate( m_v3Target - m_v3Position,
+							  a_fAngle,
+							  glm::normalize( m_v3Above - m_v3Position ) ) + m_v3Position;
 }
 

@@ -22,8 +22,11 @@ class MyRigidBody
 	vector3 m_v3Color = C_WHITE; //Color
 
 	vector3 m_v3Center = vector3(0.0f); //center point in local space
+	vector3 globalCenter = vector3( 0.0f ); //center point in global space
+
 	vector3 m_v3MinL = vector3(0.0f); //minimum coordinate in local space
 	vector3 m_v3MaxL = vector3(0.0f); //maximum coordinate in local space
+	vector3 m_v3ARBBSize = vector3( 0.0f );
 
 	vector3 m_v3MinG = vector3(0.0f); //minimum coordinate in local space
 	vector3 m_v3MaxG = vector3(0.0f); //maximum coordinate in local space
