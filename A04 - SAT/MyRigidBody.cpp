@@ -286,6 +286,92 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+	// TODO CGS SAT
+
+	// Get all the plains for A
+	vector3 Ax = vector3( m_m4ToWorld * vector4( vector3( m_v3MaxG.x - m_v3MinG.x, 0.0f, 0.0f ), 1.0f ) );
+	vector3 Ay = vector3( m_m4ToWorld * vector4( vector3( 0.0f, m_v3MaxG.y - m_v3MinG.y, 0.0f ), 1.0f ) );
+	vector3 Az = vector3( m_m4ToWorld * vector4( vector3( 0.0f, 0.0f, m_v3MaxG.z - m_v3MinG.z ), 1.0f ) );
+
+	// Get all the plains for B
+	vector3 Bx = vector3( a_pOther->m_m4ToWorld * vector4( vector3( a_pOther->m_v3MaxG.x - a_pOther->m_v3MinG.x, 0.0f, 0.0f ), 1.0f ) );
+	vector3 By = vector3( a_pOther->m_m4ToWorld * vector4( vector3( 0.0f, a_pOther->m_v3MaxG.y - a_pOther->m_v3MinG.y, 0.0f ), 1.0f ) );
+	vector3 Bz = vector3( a_pOther->m_m4ToWorld * vector4( vector3( 0.0f, 0.0f, a_pOther->m_v3MaxG.z - a_pOther->m_v3MinG.z ), 1.0f ) );
+
+	// Get all the plains for Ax cross B
+	vector3 AxBx = glm::cross( Ax, Bx );
+	vector3 AxBy = glm::cross( Ax, By );
+	vector3 AxBz = glm::cross( Ax, Bz );
+
+	// Get all the plains for Ay cross B
+	vector3 AyBx = glm::cross( Ay, Bx );
+	vector3 AyBy = glm::cross( Ay, By );
+	vector3 AyBz = glm::cross( Ay, Bz );
+
+	// Get all the plains for Az cross B
+	vector3 AzBx = glm::cross( Az, Bx );
+	vector3 AzBy = glm::cross( Az, By );
+	vector3 AzBz = glm::cross( Az, Bz );
+
+	vector3 halfARBBSize = m_v3ARBBSize / 2;
+	vector3 halfOtherARBBSize = a_pOther->m_v3ARBBSize / 2;
+
+	vector3 v3DistanceBetweenCenters = GetCenterGlobal() - a_pOther->GetCenterGlobal();
+
+	// Check all the plains for A
+	if ( glm::dot(v3DistanceBetweenCenters, Ax) > ( glm::dot( halfARBBSize, Ax ) + glm::dot( halfOtherARBBSize, Ax ) ) ) {
+		return eSATResults::SAT_AX;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, Ay ) > ( glm::dot( halfARBBSize, Ay ) + glm::dot( halfOtherARBBSize, Ay ) ) ) {
+		return eSATResults::SAT_AY;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, Az ) > ( glm::dot( halfARBBSize, Az ) + glm::dot( halfOtherARBBSize, Az ) ) ) {
+		return eSATResults::SAT_AZ;
+	}
+
+	// Check all the plains for B
+	if ( glm::dot( v3DistanceBetweenCenters, Bx ) > ( glm::dot( halfARBBSize, Bx ) + glm::dot( halfOtherARBBSize, Bx ) ) ) {
+		return eSATResults::SAT_BX;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, By ) > ( glm::dot( halfARBBSize, By ) + glm::dot( halfOtherARBBSize, By ) ) ) {
+		return eSATResults::SAT_BY;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, Bz ) > ( glm::dot( halfARBBSize, Bz ) + glm::dot( halfOtherARBBSize, Bz ) ) ) {
+		return eSATResults::SAT_BZ;
+	}
+
+	// Check all the plains for Ax cross B
+	if ( glm::dot( v3DistanceBetweenCenters, AxBx ) > ( glm::dot( halfARBBSize, AxBx ) + glm::dot( halfOtherARBBSize, AxBx ) ) ) {
+		return eSATResults::SAT_AXxBX;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AxBy ) > ( glm::dot( halfARBBSize, AxBy ) + glm::dot( halfOtherARBBSize, AxBy ) ) ) {
+		return eSATResults::SAT_AXxBY;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AxBz ) > ( glm::dot( halfARBBSize, AxBz ) + glm::dot( halfOtherARBBSize, AxBz ) ) ) {
+		return eSATResults::SAT_AXxBZ;
+	}
+
+	// Check all the plains for Ay cross B
+	if ( glm::dot( v3DistanceBetweenCenters, AyBx ) > ( glm::dot( halfARBBSize, AyBx ) + glm::dot( halfOtherARBBSize, AyBx ) ) ) {
+		return eSATResults::SAT_AYxBX;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AyBy ) > ( glm::dot( halfARBBSize, AyBy ) + glm::dot( halfOtherARBBSize, AyBy ) ) ) {
+		return eSATResults::SAT_AYxBY;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AyBz ) > ( glm::dot( halfARBBSize, AyBz ) + glm::dot( halfOtherARBBSize, AyBz ) ) ) {
+		return eSATResults::SAT_AYxBZ;
+	}
+
+	// Check all the plains for Az cross B
+	if ( glm::dot( v3DistanceBetweenCenters, AzBx ) > ( glm::dot( halfARBBSize, AzBx ) + glm::dot( halfOtherARBBSize, AzBx ) ) ) {
+		return eSATResults::SAT_AZxBX;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AzBy ) > ( glm::dot( halfARBBSize, AzBy ) + glm::dot( halfOtherARBBSize, AzBy ) ) ) {
+		return eSATResults::SAT_AZxBY;
+	}
+	if ( glm::dot( v3DistanceBetweenCenters, AzBz ) > ( glm::dot( halfARBBSize, AzBz ) + glm::dot( halfOtherARBBSize, AzBz ) ) ) {
+		return eSATResults::SAT_AZxBZ;
+	}
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
