@@ -30,6 +30,7 @@ void Application::InitVariables(void)
 		}
 	}
 	m_uOctantLevels = 1;
+	m_pRoot = new MyOctant( m_uOctantLevels, 5 );
 	m_pEntityMngr->Update();
 }
 void Application::Update(void)
@@ -66,6 +67,12 @@ void Application::Display(void)
 	//clear the render list
 	m_pMeshMngr->ClearRenderList();
 	
+	if ( m_uOctantID == -1 ) {
+		m_pRoot->Display();
+	} else {
+		m_pRoot->Display( m_uOctantID );
+	}
+
 	//draw gui,
 	DrawGUI();
 	
