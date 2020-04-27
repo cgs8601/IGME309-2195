@@ -177,13 +177,13 @@ vector3 MyOctant::GetMaxGlobal( void ) {
 }
 
 bool MyOctant::IsColliding( uint a_uRBIndex ) {
-    // get the appropriate entity from the entity manager,
+    // Get the appropriate entity from the entity manager,
     MyEntity *entity = m_pEntityMngr->GetEntity( a_uRBIndex );
     MyRigidBody *rigidbody = entity->GetRigidBody();
     vector3 entityMin = rigidbody->GetMinGlobal();
     vector3 entityMax = rigidbody->GetMaxGlobal();
 
-    // perform AABB with entity and octant
+    // Perform AABB with the entity and octant
     return ( m_v3Min.x <= entityMax.x && m_v3Max.x >= entityMin.x ) &&
            ( m_v3Min.y <= entityMax.y && m_v3Max.y >= entityMin.y ) &&
            ( m_v3Min.z <= entityMax.z && m_v3Max.z >= entityMin.z );
